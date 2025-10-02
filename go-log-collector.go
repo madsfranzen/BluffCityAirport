@@ -26,7 +26,13 @@ var (
 	checkinLog = log.NewWithOptions(os.Stderr, log.Options{
 		ReportCaller:    false,
 		ReportTimestamp: true,
-		Prefix:          "Check In",
+		Prefix:          "CHECK-IN",
+	})
+
+	splitterLog = log.NewWithOptions(os.Stderr, log.Options{
+		ReportCaller:    false,
+		ReportTimestamp: true,
+		Prefix:          "SPLITTER",
 	})
 )
 
@@ -113,6 +119,8 @@ func getLogger(service string) *log.Logger {
 	switch strings.ToLower(service) {
 	case "checkin":
 		return checkinLog
+	case "splitter":
+		return splitterLog
 	}
 	return unknownLog
 }

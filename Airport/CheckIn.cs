@@ -5,11 +5,6 @@ class CheckIn
 {
     public static async Task Run()
     {
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("[CheckIn] Check In Started...");
-
-	    await Task.Delay(2000);
-
         string json = """
             	{
             	  "Flight": {
@@ -65,6 +60,10 @@ class CheckIn
         using var connection = await factory.CreateConnectionAsync();
         using var channel = await connection.CreateChannelAsync();
 
+		Logger.LogInfo(channel, "CheckIn", "Info", "Initializing Check-In...");
+
+	    await Task.Delay(2000);
+
         await channel.QueueDeclareAsync(
             queue: "checkin_queue",
             durable: false,
@@ -74,13 +73,13 @@ class CheckIn
 
         var body = Encoding.UTF8.GetBytes(json);
 
-        // await channel.BasicPublishAsync(
-        //     exchange: string.Empty,
-        //     routingKey: "checkin_queue",
-        //     body: body
-        // );
+        await channel.BasicPublishAsync(
+            exchange: string.Empty,
+            routingKey: "checkin_queue",
+            body: body
+        );
 
-		Logger.LogInfo(channel, "CheckInn", "Info", "Succesfully delivered JSON to CheckInQueue");
+		Logger.LogInfo(channel, "CheckIn", "Info", "Succesfully delivered JSON to CheckInQueue");
 
     }
 }
