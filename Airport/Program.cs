@@ -3,10 +3,10 @@
 var checkInTask = CheckIn.Run();
 await Task.Delay(500);
 
-var splitterTask = Splitter.Run();
+// var splitterTask = Splitter.Run();
 await Task.Delay(500);
 
-await Task.WhenAll(checkInTask, splitterTask);
+await Task.WhenAll(checkInTask);
 
 await Task.Delay(200);
 Console.WriteLine("All modules completed!");

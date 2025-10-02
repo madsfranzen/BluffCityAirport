@@ -1,6 +1,4 @@
 using System.Text;
-using System.Text.Json;
-using System.Threading;
 using RabbitMQ.Client;
 
 class CheckIn
@@ -76,13 +74,13 @@ class CheckIn
 
         var body = Encoding.UTF8.GetBytes(json);
 
-        await channel.BasicPublishAsync(
-            exchange: string.Empty,
-            routingKey: "checkin_queue",
-            body: body
-        );
+        // await channel.BasicPublishAsync(
+        //     exchange: string.Empty,
+        //     routingKey: "checkin_queue",
+        //     body: body
+        // );
 
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine($"[CheckIn] Succesfully delivered JSON to checkInQueue");
+		Logger.LogInfo(channel, "CheckInn", "Info", "Succesfully delivered JSON to CheckInQueue");
+
     }
 }
