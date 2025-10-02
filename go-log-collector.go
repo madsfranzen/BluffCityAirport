@@ -16,6 +16,20 @@ type LogMessage struct {
 	Timestamp string `json:"timestamp"`
 }
 
+var (
+	unknownLog = log.NewWithOptions(os.Stderr, log.Options{
+		ReportCaller:    false,
+		ReportTimestamp: true,
+		Prefix:          "UNKNOWN",
+	})
+
+	checkinLog = log.NewWithOptions(os.Stderr, log.Options{
+		ReportCaller:    false,
+		ReportTimestamp: true,
+		Prefix:          "Check In",
+	})
+)
+
 func main() {
 
 	// Connect to RabbitMQ Server
@@ -73,6 +87,7 @@ func main() {
 	<-forever
 }
 
+// logHandler logs a message to the appropriate logger based on the service and level.
 func logHandler(service string, level string, message string, timestamp string) {
 
 	logger := getLogger(service)
@@ -91,19 +106,9 @@ func logHandler(service string, level string, message string, timestamp string) 
 	}
 }
 
+// getLogger returns the logger instance for a given service.
+// If the service is unknown, it returns a default logger with the prefix "UNKNOWN".
 func getLogger(service string) *log.Logger {
-
-	unknownLog := log.NewWithOptions(os.Stderr, log.Options{
-		ReportCaller:    false,
-		ReportTimestamp: true,
-		Prefix:          "UNKNOWN",
-	})
-
-	checkinLog := log.NewWithOptions(os.Stderr, log.Options{
-		ReportCaller:    false,
-		ReportTimestamp: true,
-		Prefix:          "Check In",
-	})
 
 	switch strings.ToLower(service) {
 	case "checkin":
