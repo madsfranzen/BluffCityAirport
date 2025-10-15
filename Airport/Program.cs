@@ -6,7 +6,10 @@ await Task.Delay(500);
 var splitterTask = Splitter.Run();
 await Task.Delay(500);
 
-await Task.WhenAll(checkInTask, splitterTask);
+var scramblerTask = Scrambler.Run();
+await Task.Delay(500);
+
+await Task.WhenAll(checkInTask, splitterTask, scramblerTask);
 
 await Task.Delay(200);
 Console.WriteLine("All modules completed!");

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
 
@@ -34,9 +35,17 @@ var (
 		ReportTimestamp: true,
 		Prefix:          "SPLITTER",
 	})
+
+	scramblerLog = log.NewWithOptions(os.Stderr, log.Options{
+		ReportCaller:    false,
+		ReportTimestamp: true,
+		Prefix:          "SCRAMBLER",
+	})
 )
 
 func main() {
+
+	fmt.Println("Logger initializing...")
 
 	// Connect to RabbitMQ Server
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
@@ -70,6 +79,8 @@ func main() {
 		nil,    // args
 	)
 	failOnError(err, "Failed to register a Consumer")
+
+	fmt.Println("Logger ready!")
 
 	// Consume forever
 	forever := make(chan struct{})
@@ -121,6 +132,8 @@ func getLogger(service string) *log.Logger {
 		return checkinLog
 	case "splitter":
 		return splitterLog
+	case "scrambler":
+		return scramblerLog
 	}
 	return unknownLog
 }

@@ -60,7 +60,7 @@ class CheckIn
         using var connection = await factory.CreateConnectionAsync();
         using var channel = await connection.CreateChannelAsync();
 
-		Logger.LogInfo(channel, "CheckIn", "Info", "Initializing Check-In...");
+		Logger.LogInfo(channel, "CheckIn", "Warn", "Initializing Check-In...");
 
 	    await Task.Delay(2000);
 
