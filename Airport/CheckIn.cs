@@ -30,25 +30,25 @@ class CheckIn
             	  "Luggage": [
             		{
             		  "Id": "CA937200305252",
-            		  "Identification": "1",
+            		  "Identification": 1,
             		  "Category": "Normal",
             		  "Weight": "17.3"
             		},
             		{
             		  "Id": "CA937200305252",
-            		  "Identification": "2",
+            		  "Identification": 2,
             		  "Category": "Large",
             		  "Weight": "22.7"
             		},
             		{
             		  "Id": "CA937200305253",
-            		  "Identification": "1",
+            		  "Identification": 1,
             		  "Category": "Large",
             		  "Weight": "24.2"
             		},
             		{
             		  "Id": "CA937200305253",
-            		  "Identification": "2",
+            		  "Identification": 2,
             		  "Category": "Large",
             		  "Weight": "21.4"
             		}

@@ -9,7 +9,10 @@ await Task.Delay(500);
 var scramblerTask = Scrambler.Run();
 await Task.Delay(500);
 
-await Task.WhenAll(checkInTask, splitterTask, scramblerTask);
+var resequencerTask = Resequencer.Run();
+await Task.Delay(500);
+
+await Task.WhenAll(checkInTask, splitterTask, scramblerTask, resequencerTask);
 
 await Task.Delay(200);
 Console.WriteLine("All modules completed!");

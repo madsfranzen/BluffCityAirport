@@ -15,11 +15,11 @@ class Scrambler
         Logger.LogInfo(channel, "scrambler", "info", "Scrambler Ready! Awaiting input...");
 
         await channel.QueueDeclareAsync("scrambler_queue", false, false, false, null);
-        // await channel.QueueDeclareAsync("resequence_queue", false, false, false, null);
+        await channel.QueueDeclareAsync("resequencer_queue", false, false, false, null);
 
         var random = new Random();
 
-        await Task.Delay(5000);
+        await Task.Delay(1000);
 
         var consumer = new AsyncEventingBasicConsumer(channel);
         consumer.ReceivedAsync += async (model, ea) =>
@@ -37,7 +37,7 @@ class Scrambler
                         return;
                     }
 
-                    int delay = random.Next(1000, 3000);
+                    int delay = random.Next(1000, 10000);
                     await Task.Delay(delay);
 
                     var body = JsonSerializer.SerializeToUtf8Bytes(luggage);
@@ -46,7 +46,7 @@ class Scrambler
                     Logger.LogInfo(channel, "scrambler", "info",
                         $"Forwarded luggage {luggage.Id} ({luggage.Identification} of {luggage.TotalCorrelation}) after {delay}ms delay");
 
-                    // await channel.BasicPublishAsync("", "resequence_queue", body);
+                    await channel.BasicPublishAsync("", "resequencer_queue", body);
                 }
                 catch (Exception ex)
                 {
