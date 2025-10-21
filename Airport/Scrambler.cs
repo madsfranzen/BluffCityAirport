@@ -12,7 +12,7 @@ class Scrambler
         using var connection = await factory.CreateConnectionAsync();
         using var channel = await connection.CreateChannelAsync();
 
-        Logger.LogInfo(channel, "scrambler", "info", "Scrambler Ready! Awaiting input...");
+        Logger.LogInfo(channel, "scrambler", "warn", "Scrambler Ready! Awaiting input...");
 
         await channel.QueueDeclareAsync("scrambler_queue", false, false, false, null);
         await channel.QueueDeclareAsync("resequencer_queue", false, false, false, null);
@@ -42,7 +42,6 @@ class Scrambler
 
                     var body = JsonSerializer.SerializeToUtf8Bytes(luggage);
 
-                    // Simulate publish
                     Logger.LogInfo(channel, "scrambler", "info",
                         $"Forwarded luggage {luggage.Id} ({luggage.Identification} of {luggage.TotalCorrelation}) after {delay}ms delay");
 

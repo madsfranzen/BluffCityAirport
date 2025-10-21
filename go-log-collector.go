@@ -47,6 +47,11 @@ var (
 		ReportTimestamp: true,
 		Prefix:          "RESEQUENCER",
 	})
+	aggregatorLog = log.NewWithOptions(os.Stderr, log.Options{
+		ReportCaller:    false,
+		ReportTimestamp: true,
+		Prefix:          "AGGREGATOR",
+	})
 )
 
 func main() {
@@ -142,6 +147,8 @@ func getLogger(service string) *log.Logger {
 		return scramblerLog
 	case "resequencer":
 		return resequencerLog
+	case "aggregator":
+		return aggregatorLog
 	}
 	return unknownLog
 }

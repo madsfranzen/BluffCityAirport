@@ -12,10 +12,11 @@ class Splitter
         using var connection = await factory.CreateConnectionAsync();
         using var channel = await connection.CreateChannelAsync();
 
-        Logger.LogInfo(channel, "splitter", "info", "Splitter Ready! Awaiting input...");
+        Logger.LogInfo(channel, "splitter", "warn", "Splitter Ready! Awaiting input...");
 
         await channel.QueueDeclareAsync("checkin_queue", false, false, false, null);
         await channel.QueueDeclareAsync("scrambler_queue", false, false, false, null);
+        await channel.QueueDeclareAsync("resequencer_queue_queue", false, false, false, null);
 
         var consumer = new AsyncEventingBasicConsumer(channel);
         consumer.ReceivedAsync += async (model, ea) =>
@@ -32,6 +33,18 @@ class Splitter
                     Logger.LogInfo(channel, "splitter", "error", "Unexpected error! Checkin-JSON might be null!");
                     return;
                 }
+
+                var message = new
+                {
+                    Flight = checkInData.Flight,
+                    Passenger = checkInData.Passenger
+                };
+
+                await channel.BasicPublishAsync(
+                    exchange: "",
+                    routingKey: "aggregator_queue",
+                    body: JsonSerializer.SerializeToUtf8Bytes(message)
+                );
 
                 Logger.LogInfo(channel, "splitter", "info", $"Received {checkInData.Luggage.Count} luggage items.");
 

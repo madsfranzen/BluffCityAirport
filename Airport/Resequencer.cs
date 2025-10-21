@@ -1,4 +1,3 @@
-
 using System.Text;
 using System.Text.Json;
 using RabbitMQ.Client;
@@ -86,34 +85,37 @@ class Resequencer
                     return;
                 }
 
-                Logger.LogInfo(channel, "resequencer", "info", $"Received luggage : {luggage.ToString()}");
-
                 // returns true if we are done processing this sequence
                 if (ProcessLuggage(luggage))
                 {
 
-                    Logger.LogInfo(channel, "resequencer", "info", $"Done processing sequence : {luggage.Id}");
+                    string flightNumber = luggage.Flight!.Attributes.number;
 
                     List<Luggage> luggagesPackage = new List<Luggage>();
 
                     foreach (Luggage lug in recievedMessages[luggage.Id].GetLuggages())
                     {
                         luggagesPackage.Add(lug);
-                        Logger.LogInfo(channel, "resequencer", "info", $" Sending to Aggregator : {lug.ToString()}");
                     }
 
-                    var body = JsonSerializer.SerializeToUtf8Bytes(luggagesPackage);
+                    var message = new
+                    {
+                        flightNumber,
+                        luggagesPackage
+                    };
+
+                    var body = JsonSerializer.SerializeToUtf8Bytes(message);
 
                     await channel.BasicPublishAsync("", "aggregator_queue", body);
 
-                    Logger.LogInfo(channel, "resequencer", "info", "Package sent to Aggregator!");
+                    Logger.LogInfo(channel, "resequencer", "info", $"Done processing sequence : {luggage.Id} - {luggagesPackage.Count()} of {luggage.TotalCorrelation}");
 
                     recievedMessages.Remove(luggage.Id);
                 }
             }
             catch (Exception ex)
             {
-                Logger.LogInfo(channel, "resequencer", "error", $"Error in scrambler: {ex}");
+                Logger.LogInfo(channel, "resequencer", "error", $"Error in Resequencer: {ex}");
             }
 
             await Task.Yield();
