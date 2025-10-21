@@ -24,26 +24,23 @@ class Scrambler
         var consumer = new AsyncEventingBasicConsumer(channel);
         consumer.ReceivedAsync += async (model, ea) =>
         {
+            // We start a new task for each message we recieve, processing them asynchronously
+            // This, combined with the random delay mechanism below, is what makes our scrambler work.
             _ = Task.Run(async () =>
             {
                 try
                 {
                     var jsonString = Encoding.UTF8.GetString(ea.Body.ToArray());
                     var luggage = JsonSerializer.Deserialize<Luggage>(jsonString);
+                    var body = JsonSerializer.SerializeToUtf8Bytes(luggage);
 
-                    if (luggage == null)
-                    {
-                        Logger.LogInfo(channel, "scrambler", "error", "Received null luggage object!");
-                        return;
-                    }
-
+                    // This random delay serves at the scrambling logic itself.
+                    // Each luggage message is published with a randomized delay and becomes shuffled/scrambled as an effect of that.
                     int delay = random.Next(1000, 10000);
                     await Task.Delay(delay);
 
-                    var body = JsonSerializer.SerializeToUtf8Bytes(luggage);
-
                     Logger.LogInfo(channel, "scrambler", "info",
-                        $"Forwarded luggage {luggage.Id} ({luggage.Identification} of {luggage.TotalCorrelation}) after {delay}ms delay");
+                        $"Forwarded luggage {luggage!.Id} ({luggage.Identification} of {luggage.TotalCorrelation}) after {delay}ms delay");
 
                     await channel.BasicPublishAsync("", "resequencer_queue", body);
                 }
