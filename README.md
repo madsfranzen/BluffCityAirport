@@ -9,13 +9,13 @@ The goal is to demonstrate **system integration concepts** and **Enterprise Inte
 
 Airports rely on many subsystems working together. Here we focus on **passenger check-in and luggage handling**, showing how data flows through different messaging steps:
 
-1. **Check-in** – create a passenger record with flight and luggage information.
-2. **Splitter** – split passenger and luggage info into separate messages for further external handling.
-3. **Scrambler** – shuffle/delay messages to simulate real-world systems.
-4. **Resequencer** – restore the correct order.
-5. **Aggregator** – merge data back into a full passenger record.
+1. **Check-in** – create a check-in record with flight, passenger and luggage information.
+2. **Splitter** – split flight, passenger and luggage info into separate messages for further external handling.
+3. **Scrambler** – shuffle/delay the luggage messages to simulate real-world systems.
+4. **Resequencer** – restore the correct order of luggage messages.
+5. **Aggregator** – merge data back into a full check-in record.
 
-Additionally, we are building an external logging system that delivers detailed, real-time insights into how data and messages flow through the system.
+Additionally, we built an external logging system that delivers detailed, real-time insights into how data and messages flow through the system.
 
 ---
 
