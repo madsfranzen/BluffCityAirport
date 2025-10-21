@@ -85,6 +85,8 @@ class Splitter
     {
         foreach (var lug in luggageBatch)
         {
+            await Task.Delay(250);
+
             try
             {
                 var body = JsonSerializer.SerializeToUtf8Bytes(lug);
