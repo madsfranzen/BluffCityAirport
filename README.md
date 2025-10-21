@@ -21,14 +21,7 @@ Additionally, we built an external logging system that delivers detailed, real-t
 
 ## 🔄 Data Flow
 
-```mermaid
-flowchart LR
-    A[Check-in] --> B[Splitter]
-    B --> C[Scrambler]
-    C --> D[Resequencer]
-    D --> E[Aggregator]
-    E --> F[(Final Aggregated Passenger)]
-```
+<img width="867" height="511" alt="data flow" src="https://github.com/user-attachments/assets/a87b7362-fbdc-495f-8c78-2eeaf8965e1a" />
 
 ---
 
