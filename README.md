@@ -1,4 +1,4 @@
-# (WIP) ✈️ Bluff City Airport – Enterprise System Integration Simulation
+# ✈️ Bluff City Airport – Enterprise System Integration Simulation
 
 This project simulates the messaging flow of a fictional airport called **Bluff City Airport**.
 The goal is to demonstrate **system integration concepts** and **Enterprise Integration Patterns (EIP)** using **RabbitMQ**, **C#**, and **Go**.
