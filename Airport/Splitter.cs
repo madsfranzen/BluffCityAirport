@@ -6,11 +6,13 @@ using Schemas;
 
 class Splitter
 {
+    private static IChannel? channel;
+
     public static async Task Run()
     {
         var factory = new ConnectionFactory() { HostName = "localhost" };
         using var connection = await factory.CreateConnectionAsync();
-        using var channel = await connection.CreateChannelAsync();
+        channel = await connection.CreateChannelAsync();
 
         Logger.LogInfo(channel, "splitter", "warn", "Splitter Ready! Awaiting input...");
 
@@ -23,57 +25,19 @@ class Splitter
         {
             try
             {
+                // Small delay for simulation purposes
                 await Task.Delay(250);
 
                 var jsonString = Encoding.UTF8.GetString(ea.Body.ToArray());
                 var checkInData = JsonSerializer.Deserialize<CheckInJSON>(jsonString);
 
-                if (checkInData == null)
-                {
-                    Logger.LogInfo(channel, "splitter", "error", "Unexpected error! Checkin-JSON might be null!");
-                    return;
-                }
-
-                var message = new
-                {
-                    Flight = checkInData.Flight,
-                    Passenger = checkInData.Passenger
-                };
-
-                await channel.BasicPublishAsync(
-                    exchange: "",
-                    routingKey: "aggregator_queue",
-                    body: JsonSerializer.SerializeToUtf8Bytes(message)
-                );
-
-                Logger.LogInfo(channel, "splitter", "info", $"Received {checkInData.Luggage.Count} luggage items.");
-
-                // STEP 1: Build luggage correlation map
-                var luggageMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-                foreach (var lug in checkInData.Luggage)
-                {
-                    luggageMap[lug.Id] = luggageMap.GetValueOrDefault(lug.Id) + 1;
-                }
-
-                // STEP 2: Enrich and prepare
-                var enrichedLuggage = new List<Luggage>();
-                foreach (var lug in checkInData.Luggage)
-                {
-                    lug.TotalCorrelation = luggageMap[lug.Id];
-                    lug.Flight = checkInData.Flight;
-                    enrichedLuggage.Add(lug);
-                }
-
-                // STEP 3: Delegate sending
-                await PublishLuggageBatch(channel, enrichedLuggage);
-
-                Logger.LogInfo(channel, "splitter", "info", $"Done splitting {checkInData.Luggage.Count} luggages. All sent off to scrambler_queue!");
+                ProcessFlightAndPassengers(checkInData!);
+                ProcessLuggages(checkInData!);
             }
             catch (Exception ex)
             {
                 Logger.LogInfo(channel, "splitter", "error", $"Error in splitter: {ex}");
             }
-
             await Task.Yield();
         };
 
@@ -81,30 +45,72 @@ class Splitter
         await Task.Delay(-1);
     }
 
-    private static async Task PublishLuggageBatch(IChannel channel, List<Luggage> luggageBatch)
+    private static async void ProcessFlightAndPassengers(CheckInJSON checkInData)
+    {
+        var message = new
+        {
+            Flight = checkInData!.Flight,
+            Passenger = checkInData.Passenger
+        };
+
+        await channel!.BasicPublishAsync(
+            exchange: "",
+            routingKey: "aggregator_queue",
+            body: JsonSerializer.SerializeToUtf8Bytes(message)
+        );
+    }
+
+    private static async void ProcessLuggages(CheckInJSON checkInData)
+    {
+        Logger.LogInfo(channel!, "splitter", "info", $"Received {checkInData.Luggage.Count} luggage items.");
+
+        // STEP 1: Build luggage correlation map
+        var luggageMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var lug in checkInData.Luggage)
+        {
+            luggageMap[lug.Id] = luggageMap.GetValueOrDefault(lug.Id) + 1;
+        }
+
+        // STEP 2: Enrich and prepare
+        var enrichedLuggage = new List<Luggage>();
+        foreach (var lug in checkInData.Luggage)
+        {
+            lug.TotalCorrelation = luggageMap[lug.Id];
+            lug.Flight = checkInData.Flight;
+            enrichedLuggage.Add(lug);
+        }
+
+        // STEP 3: Delegate sending
+        await PublishLuggageBatch(enrichedLuggage);
+
+        Logger.LogInfo(channel!, "splitter", "info", $"Done splitting {checkInData.Luggage.Count} luggages. All sent off to scrambler_queue!");
+    }
+
+    private static async Task PublishLuggageBatch(List<Luggage> luggageBatch)
     {
         foreach (var lug in luggageBatch)
         {
+            // Again, a small delay for simulation purposes
             await Task.Delay(250);
 
             try
             {
                 var body = JsonSerializer.SerializeToUtf8Bytes(lug);
 
-                await channel.BasicPublishAsync(
+                await channel!.BasicPublishAsync(
                     exchange: string.Empty,
                     routingKey: "scrambler_queue",
                     body: body
                 );
 
-                Logger.LogInfo(channel, "splitter", "info", $"Sent luggage {lug.Id} to scrambler_queue");
+                Logger.LogInfo(channel!, "splitter", "info", $"Sent luggage {lug.Id} to scrambler_queue");
             }
             catch (Exception ex)
             {
-                Logger.LogInfo(channel, "splitter", "error", $"Failed to send luggage {lug.Id}: {ex.Message}");
+                Logger.LogInfo(channel!, "splitter", "error", $"Failed to send luggage {lug.Id}: {ex.Message}");
             }
 
-            // Optional: small delay to avoid message burst
+            // Small delay to avoid message burst
             await Task.Delay(50);
         }
     }
