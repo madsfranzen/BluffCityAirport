@@ -27,9 +27,9 @@ Additionally, we built an external logging system that delivers detailed, real-t
 
 ## 🛠 Technologies
 
-* RabbitMQ (via Docker Compose)
-* C# (.NET) — majority of messaging components
-* Go — logging and scrambling simulation
+- **RabbitMQ** — message broker for inter-service communication (running via Docker Compose)  
+- **C# (.NET)** — core language for both the **messaging components** and the **scrambler module**  
+- **Go** — used for logging and simulation, featuring [**`log`**](https://github.com/charmbracelet/log) for structured, human-friendly logging
 
 ---
 
